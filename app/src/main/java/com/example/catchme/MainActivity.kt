@@ -53,14 +53,15 @@ fun GameScreen() {
 
     val runnable: Runnable by lazy {
         Runnable {
-            val x = generateRandomFloat(configuration.widthPixels)
-            val y = generateRandomFloat(configuration.widthPixels)
+            val x = generateRandomFloat(configuration.xdpi.toInt())
+            val y = generateRandomFloat(configuration.ydpi.toInt())
             position = Offset(x, y)
         }
         }
 
     val handler = Handler(Looper.getMainLooper())
     if (lives > 0) handler.postDelayed(runnable, 2000)
+    else handler.removeCallbacks(runnable)
 
     Scaffold(modifier = Modifier.background(color = Color.Red),
         topBar = { TopAppBar(score, lives) }) {
@@ -84,11 +85,10 @@ fun Greeting(paddingValues: PaddingValues, offsetAnim: State<Offset>, onClick: (
             contentDescription = "",
             modifier = Modifier
                 .offset(offsetAnim.value.x.dp, offsetAnim.value.y.dp)
-                .height(25.dp)
-                .width(25.dp)
+                .height(60.dp)
+                .width(60.dp)
                 .clickable { onClick() }
                 .background(color = Color.Red)
-                .constrainIn
         )
     }
 }
