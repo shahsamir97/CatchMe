@@ -50,28 +50,36 @@ fun GameScreen() {
     val offsetAnim = animateOffsetAsState(targetValue = position)
     var score by remember { mutableStateOf(gameData.score) }
     var lives by remember { mutableStateOf(gameData.lives) }
+    var timerSpeed = 2000L
 
     val runnable: Runnable by lazy {
         Runnable {
-            val x = generateRandomFloat(configuration.xdpi.toInt())
+            val x = generateRandomFloat(configuration.xdpi.toInt()) - 50
             val y = generateRandomFloat(configuration.ydpi.toInt())
             position = Offset(x, y)
         }
-        }
+    }
 
     val handler = Handler(Looper.getMainLooper())
-    if (lives > 0) handler.postDelayed(runnable, 2000)
+    if (lives > 0) handler.postDelayed(runnable, timerSpeed)
     else handler.removeCallbacks(runnable)
 
     Scaffold(modifier = Modifier.background(color = Color.Red),
         topBar = { TopAppBar(score, lives) }) {
-        Surface(modifier = Modifier.clickable {
-            if (lives < 1)
-                handler.removeCallbacks(runnable)
-            lives--
-        }.fillMaxSize()) {
+        Surface(modifier = Modifier
+            .clickable {
+                if (lives > 0) {
+                    lives--
+                } else {
+                    handler.removeCallbacks(runnable)
+                }
+            }
+            .fillMaxSize()) {
             Greeting(paddingValues = it, offsetAnim) {
-                score++
+                if (lives > 0)
+                    score++
+                if (timerSpeed > 400)
+                    timerSpeed -= 100
             }
         }
     }
@@ -79,16 +87,18 @@ fun GameScreen() {
 
 @Composable
 fun Greeting(paddingValues: PaddingValues, offsetAnim: State<Offset>, onClick: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize().background(color = Color.Blue)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         Image(
             painter = painterResource(id = R.drawable.jerry),
             contentDescription = "",
             modifier = Modifier
                 .offset(offsetAnim.value.x.dp, offsetAnim.value.y.dp)
-                .height(60.dp)
-                .width(60.dp)
+                .height(120.dp)
+                .width(120.dp)
                 .clickable { onClick() }
-                .background(color = Color.Red)
         )
     }
 }
@@ -108,8 +118,8 @@ fun TopAppBar(score: Int, lives: Int) {
 }
 
 fun generateRandomFloat(max: Int): Float {
-    val value = Random.nextInt(max +1).toFloat()
-    Log.i("Position :::",value.toString())
+    val value = Random.nextInt(max + 1).toFloat()
+    Log.i("Position :::", value.toString())
     return value
 }
 
